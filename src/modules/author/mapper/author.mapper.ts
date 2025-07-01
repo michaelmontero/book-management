@@ -50,6 +50,17 @@ export class AuthorMapper {
   }
 
   /**
+   * Maps array of AuthorDocuments to array of AuthorResponseDtos
+   */
+  toResponseDtoArray(authorDocuments: AuthorDocument[]): AuthorResponseDto[] {
+    if (!Array.isArray(authorDocuments)) {
+      return [];
+    }
+
+    return authorDocuments?.map((doc) => this.toResponseDto(doc));
+  }
+
+  /**
    * Helper method to clean and filter string arrays
    */
   private cleanStringArray(array?: string[]): string[] {

@@ -1,8 +1,30 @@
-import { Controller, Post, Body, HttpStatus, HttpCode } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Get,
+  Query,
+  Body,
+  HttpStatus,
+  HttpCode,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { AuthorService } from './author.service';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { AuthorResponseDto } from './dto/author-response.dto';
+import {
+  createPaginatedResponseDto,
+  PaginatedResponseDto,
+} from 'src/common/dto/pagination.dto';
+import { QueryAuthorDto } from './dto/query-author.dto';
+
+const PaginatedAuthorsResponseDto =
+  createPaginatedResponseDto(AuthorResponseDto);
 
 @ApiTags('authors')
 @Controller('authors')
@@ -28,5 +50,39 @@ export class AuthorController {
     @Body() createAuthorDto: CreateAuthorDto,
   ): Promise<AuthorResponseDto> {
     return this.authorService.create(createAuthorDto);
+  }
+
+  @Get()
+  @ApiOperation({
+    summary: 'Get all authors with pagination',
+    description: 'Retrieves a paginated list of authors',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10, max: 100)',
+    example: 10,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of authors retrieved successfully',
+    type: PaginatedAuthorsResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Invalid query parameters',
+  })
+  async findAll(
+    @Query() query: QueryAuthorDto,
+  ): Promise<PaginatedResponseDto<AuthorResponseDto>> {
+    return this.authorService.findAllPaginated(query);
   }
 }

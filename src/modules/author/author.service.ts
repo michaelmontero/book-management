@@ -5,6 +5,11 @@ import { CreateAuthorDto } from './dto/create-author.dto';
 import { AuthorMapper } from './mapper/author.mapper';
 import { Author, AuthorDocument } from './schema/author.schema';
 import { AuthorResponseDto } from './dto/author-response.dto';
+import {
+  PaginatedResponseDto,
+  PaginationMetaDto,
+} from 'src/common/dto/pagination.dto';
+import { QueryAuthorDto } from './dto/query-author.dto';
 
 @Injectable()
 export class AuthorService {
@@ -27,5 +32,40 @@ export class AuthorService {
       }
       throw error;
     }
+  }
+
+  async findAllPaginated(
+    query: QueryAuthorDto,
+  ): Promise<PaginatedResponseDto<AuthorResponseDto>> {
+    const { page = 1, limit = 10 } = query;
+
+    const skip = (page - 1) * limit;
+
+    const [authors, total] = await Promise.all([
+      this.authorModel
+        .find()
+        .sort({ createdAt: -1 }) // Most recent first
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+      this.authorModel.countDocuments().exec(),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    const meta: PaginationMetaDto = {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage,
+      hasPrevPage,
+    };
+
+    const data = this.authorMapper.toResponseDtoArray(authors);
+
+    return new PaginatedResponseDto(data, meta);
   }
 }
