@@ -29,7 +29,7 @@ export class AuthorMapper {
    */
   toResponseDto(authorDocument: AuthorDocument): AuthorResponseDto {
     const responseDto = plainToClass(AuthorResponseDto, {
-      id: authorDocument._id?.toString() || authorDocument.id,
+      id: authorDocument._id?.toString(),
       firstName: authorDocument.firstName,
       lastName: authorDocument.lastName,
       fullName: `${authorDocument.firstName} ${authorDocument.lastName}`,
@@ -57,7 +57,7 @@ export class AuthorMapper {
       return [];
     }
 
-    return authorDocuments?.map((doc) => this.toResponseDto(doc));
+    return authorDocuments?.map(this.toResponseDto);
   }
 
   /**

@@ -1,6 +1,11 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { isValidObjectId, Model, Types } from 'mongoose';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { AuthorMapper } from './mapper/author.mapper';
 import { Author, AuthorDocument } from './schema/author.schema';
@@ -67,5 +72,40 @@ export class AuthorService {
     const data = this.authorMapper.toResponseDtoArray(authors);
 
     return new PaginatedResponseDto(data, meta);
+  }
+
+  async findOne(id: string): Promise<AuthorResponseDto> {
+    console.log('Finding author with ID:', id);
+
+    // Validate ObjectId format
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    try {
+      const objectId = new Types.ObjectId(id);
+
+      const author = await this.authorModel.findById(objectId).exec();
+      if (!author) {
+        throw new NotFoundException(`Author with ID ${id} not found`);
+      }
+
+      return this.authorMapper.toResponseDto(author);
+    } catch (error) {
+      console.error('Error in findOne:', error);
+
+      // If it's already a known exception, re-throw it
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
+      // Handle any other database errors
+      throw new BadRequestException(
+        `Error retrieving author: ${error.message}`,
+      );
+    }
   }
 }

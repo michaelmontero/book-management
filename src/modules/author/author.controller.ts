@@ -6,6 +6,7 @@ import {
   Body,
   HttpStatus,
   HttpCode,
+  Param,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -13,6 +14,7 @@ import {
   ApiResponse,
   ApiBody,
   ApiQuery,
+  ApiParam,
 } from '@nestjs/swagger';
 import { AuthorService } from './author.service';
 import { CreateAuthorDto } from './dto/create-author.dto';
@@ -84,5 +86,29 @@ export class AuthorController {
     @Query() query: QueryAuthorDto,
   ): Promise<PaginatedResponseDto<AuthorResponseDto>> {
     return this.authorService.findAllPaginated(query);
+  }
+
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Get author by ID',
+    description: 'Retrieves a single author by their unique identifier',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Author unique identifier (MongoDB ObjectId)',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Author retrieved successfully',
+    type: AuthorResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Author not found',
+  })
+  async findOne(@Param('id') id: string): Promise<AuthorResponseDto> {
+    return this.authorService.findOne(id);
   }
 }
