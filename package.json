@@ -11,9 +11,9 @@
     "dev:app": "cd app && npm run dev",
     "build:api": "cd api && npm run build",
     "build:app": "cd app && npm run build",
-    "install:all": "npm install && npm run install:api && npm run install:app",
-    "install:api": "cd api && npm install",
-    "install:app": "cd app && npm install"
+    "install:all": "yarn install && npm run install:api && npm run install:app",
+    "install:api": "cd api && yarn install",
+    "install:app": "cd app && yarn install"
   },
   "devDependencies": {
     "concurrently": "^8.2.0"
