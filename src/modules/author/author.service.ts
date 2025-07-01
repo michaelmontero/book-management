@@ -1,36 +1,44 @@
 import {
   Injectable,
+  NotFoundException,
   ConflictException,
   BadRequestException,
-  NotFoundException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { isValidObjectId, Model, Types } from 'mongoose';
-import { CreateAuthorDto } from './dto/create-author.dto';
-import { AuthorMapper } from './mapper/author.mapper';
-import { Author, AuthorDocument } from './schema/author.schema';
-import { AuthorResponseDto } from './dto/author-response.dto';
+import { type Model, isValidObjectId } from 'mongoose';
+import type { CreateAuthorDto } from './dto/create-author.dto';
+import type { AuthorResponseDto } from './dto/author-response.dto';
+import type { QueryAuthorDto } from './dto/query-author.dto';
 import {
   PaginatedResponseDto,
   PaginationMetaDto,
 } from 'src/common/dto/pagination.dto';
-import { QueryAuthorDto } from './dto/query-author.dto';
+import { AuthorMapper } from './mapper/author.mapper';
+import { Author, AuthorDocument } from './schema/author.schema';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class AuthorService {
   constructor(
     @InjectModel(Author.name) private authorModel: Model<AuthorDocument>,
     private readonly authorMapper: AuthorMapper,
-  ) {}
+  ) {
+    this.authorModel = authorModel;
+    this.authorMapper = authorMapper;
+  }
 
   async create(createAuthorDto: CreateAuthorDto): Promise<AuthorResponseDto> {
     try {
       const authorData = this.authorMapper.toEntity(createAuthorDto);
-
       const createdAuthor = new this.authorModel(authorData);
       const savedAuthor = await createdAuthor.save();
 
-      return this.authorMapper.toResponseDto(savedAuthor);
+      // Populate bookCount for response
+      const populatedAuthor = await this.authorModel
+        .findById(savedAuthor._id)
+        .populate('bookCount')
+        .exec();
+
+      return this.authorMapper.toResponseDto(populatedAuthor);
     } catch (error) {
       if (error.code === 11000) {
         throw new ConflictException('Author with this email already exists');
@@ -44,16 +52,18 @@ export class AuthorService {
   ): Promise<PaginatedResponseDto<AuthorResponseDto>> {
     const { page = 1, limit = 10 } = query;
 
+    const filter: any = {};
+
     const skip = (page - 1) * limit;
 
     const [authors, total] = await Promise.all([
       this.authorModel
-        .find()
-        .sort({ createdAt: -1 }) // Most recent first
+        .find(filter)
+        .populate('bookCount')
         .skip(skip)
         .limit(limit)
         .exec(),
-      this.authorModel.countDocuments().exec(),
+      this.authorModel.countDocuments(filter).exec(),
     ]);
 
     const totalPages = Math.ceil(total / limit);
@@ -75,37 +85,71 @@ export class AuthorService {
   }
 
   async findOne(id: string): Promise<AuthorResponseDto> {
-    console.log('Finding author with ID:', id);
-
-    // Validate ObjectId format
     if (!isValidObjectId(id)) {
       throw new BadRequestException('Invalid ID format');
     }
 
     try {
-      const objectId = new Types.ObjectId(id);
+      const author = await this.authorModel
+        .findById(id)
+        .populate('bookCount')
+        .exec();
 
-      const author = await this.authorModel.findById(objectId).exec();
       if (!author) {
         throw new NotFoundException(`Author with ID ${id} not found`);
       }
 
       return this.authorMapper.toResponseDto(author);
     } catch (error) {
-      console.error('Error in findOne:', error);
-
-      // If it's already a known exception, re-throw it
       if (
         error instanceof NotFoundException ||
         error instanceof BadRequestException
       ) {
         throw error;
       }
-
-      // Handle any other database errors
       throw new BadRequestException(
         `Error retrieving author: ${error.message}`,
       );
     }
+  }
+
+  async remove(id: string): Promise<void> {
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    const deletedAuthor = await this.authorModel.findByIdAndDelete(id).exec();
+
+    if (!deletedAuthor) {
+      throw new NotFoundException(`Author with ID ${id} not found`);
+    }
+  }
+
+  async exists(id: string): Promise<boolean> {
+    if (!isValidObjectId(id)) {
+      return false;
+    }
+
+    const count = await this.authorModel.countDocuments({ _id: id }).exec();
+    return count > 0;
+  }
+
+  // Method to get authors with their books
+  async findWithBooks(id: string) {
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    const author = await this.authorModel
+      .findById(id)
+      .populate('books')
+      .populate('bookCount')
+      .exec();
+
+    if (!author) {
+      throw new NotFoundException(`Author with ID ${id} not found`);
+    }
+
+    return author;
   }
 }

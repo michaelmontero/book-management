@@ -1,104 +1,95 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import type { HydratedDocument } from 'mongoose';
 
-export type AuthorDocument = Author &
-  Document & {
-    createdAt: Date;
-    updatedAt: Date;
-  };
+export type AuthorDocument = HydratedDocument<Author> & {
+  bookCount?: number;
+};
 
 @Schema({
   timestamps: true,
-  collection: 'authors',
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
 })
 export class Author {
   @Prop({
     required: true,
     trim: true,
+    maxlength: 50,
   })
   firstName: string;
 
   @Prop({
     required: true,
     trim: true,
+    maxlength: 50,
   })
   lastName: string;
 
   @Prop({
     required: true,
     unique: true,
-    lowercase: true,
     trim: true,
-    // Solo validación básica como respaldo
-    match: [/\S+@\S+\.\S+/, 'Invalid email format'],
+    lowercase: true,
+    validate: {
+      validator: (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+      },
+      message: 'Invalid email format',
+    },
   })
   email: string;
 
-  @Prop({ trim: true })
+  @Prop({
+    trim: true,
+  })
   photo?: string;
 
-  @Prop({ trim: true })
+  @Prop({
+    trim: true,
+    maxlength: 1000,
+  })
   bio?: string;
 
-  @Prop({ trim: true })
+  @Prop({
+    trim: true,
+    maxlength: 100,
+  })
   country?: string;
 
-  @Prop({ trim: true })
-  website?: string;
+  @Prop({
+    type: [String],
+    default: [],
+  })
+  socialMedia: string[];
 
-  @Prop({ type: [String], default: [] })
-  socialMedia?: string[];
-
-  @Prop({ type: [String], default: [] })
-  awards?: string[];
-
-  @Prop({ trim: true })
-  agentContact?: string;
-
-  get fullName(): string {
-    return `${this.firstName} ${this.lastName}`;
-  }
-  booksCount?: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const AuthorSchema = SchemaFactory.createForClass(Author);
 
+// Add virtual for full name
 AuthorSchema.virtual('fullName').get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 
-// Add virtual for booksCount (to be populated from books collection)
-AuthorSchema.virtual('booksCount', {
+// Add virtual populate for books
+AuthorSchema.virtual('books', {
+  ref: 'Book',
+  localField: '_id',
+  foreignField: 'authorId',
+});
+
+// Add virtual for book count
+AuthorSchema.virtual('bookCount', {
   ref: 'Book',
   localField: '_id',
   foreignField: 'authorId',
   count: true,
 });
 
-// Ensure virtual fields are serialized
-AuthorSchema.set('toJSON', {
-  virtuals: true,
-  transform: function (doc, ret) {
-    ret.id = ret._id;
-    delete ret._id;
-    delete ret.__v;
-    return ret;
-  },
-});
-
-AuthorSchema.set('toObject', { virtuals: true });
-
-// Add indexes for better performance
-AuthorSchema.index({ email: 1 }, { unique: true });
+// Add indexes
+AuthorSchema.index({ email: 1 });
 AuthorSchema.index({ firstName: 1, lastName: 1 });
 AuthorSchema.index({ country: 1 });
-AuthorSchema.index({ createdAt: -1 });
-
-// Add text index for search functionality
-AuthorSchema.index({
-  firstName: 'text',
-  lastName: 'text',
-  email: 'text',
-  bio: 'text',
-  country: 'text',
-});

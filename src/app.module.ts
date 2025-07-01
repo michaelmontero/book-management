@@ -3,7 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { HealthModule } from '##modules/health/health.module';
 import { LibraryConfigModule } from '##modules/config/config.module';
-import { AuthorModule } from './modules/author/author.module';
+import { BookModule } from '##modules/book/book.module';
+import { AuthorModule } from '##modules/author/author.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthorModule } from './modules/author/author.module';
     }),
     HealthModule,
     AuthorModule,
+    BookModule,
   ],
 })
 export class AppModule {}
