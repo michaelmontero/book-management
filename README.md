@@ -13,4 +13,3 @@ aucto/
 ├── package.json  # Root package.json
 └── README.md     # Este archivo
 ```
-
