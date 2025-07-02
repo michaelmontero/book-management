@@ -9,7 +9,7 @@ export class BookMapper {
   /**
    * Maps CreateBookDto to Book entity for database insertion
    */
-  toEntity(createBookDto: CreateBookDto): Partial<Book> {
+  static toEntity(createBookDto: CreateBookDto): Partial<Book> {
     return {
       title: createBookDto.title?.trim(),
       isbn: createBookDto.isbn?.trim().replace(/[-\s]/g, ''),
@@ -32,7 +32,7 @@ export class BookMapper {
   /**
    * Maps BookDocument to BookResponseDto for API response
    */
-  toResponseDto(bookDocument: BookDocument): BookResponseDto {
+  static toResponseDto(bookDocument: BookDocument): BookResponseDto {
     if (!bookDocument) {
       throw new Error('BookDocument is required for mapping');
     }
@@ -68,7 +68,7 @@ export class BookMapper {
   /**
    * Maps array of BookDocuments to array of BookResponseDtos
    */
-  toResponseDtoArray(bookDocuments: BookDocument[]): BookResponseDto[] {
+  static toResponseDtoArray(bookDocuments: BookDocument[]): BookResponseDto[] {
     if (!Array.isArray(bookDocuments)) {
       return [];
     }
@@ -79,7 +79,9 @@ export class BookMapper {
   /**
    * Maps BookDocument to a simplified response (for lists, etc.)
    */
-  toSimpleResponse(bookDocument: BookDocument): Partial<BookResponseDto> {
+  static toSimpleResponse(
+    bookDocument: BookDocument,
+  ): Partial<BookResponseDto> {
     return {
       id: bookDocument._id?.toString() || bookDocument.id,
       title: bookDocument.title,
@@ -98,7 +100,7 @@ export class BookMapper {
   /**
    * Maps array of BookDocuments to simplified responses
    */
-  toSimpleResponseArray(
+  static toSimpleResponseArray(
     bookDocuments: BookDocument[],
   ): Partial<BookResponseDto>[] {
     if (!Array.isArray(bookDocuments)) {
@@ -111,7 +113,7 @@ export class BookMapper {
   /**
    * Helper method to map author data
    */
-  private mapAuthor(author: any): BookAuthorDto | undefined {
+  private static mapAuthor(author: any): BookAuthorDto | undefined {
     if (!author) {
       return undefined;
     }
@@ -127,14 +129,14 @@ export class BookMapper {
   /**
    * Helper method to check if update data has any actual changes
    */
-  hasChanges(updateData: Partial<Book>): boolean {
+  static hasChanges(updateData: Partial<Book>): boolean {
     return Object.keys(updateData).length > 0;
   }
 
   /**
    * Helper method to prepare data for search/filtering
    */
-  prepareSearchData(bookDocument: BookDocument): any {
+  static prepareSearchData(bookDocument: BookDocument): any {
     return {
       id: bookDocument._id?.toString(),
       title: bookDocument.title?.toLowerCase(),

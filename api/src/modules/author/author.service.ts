@@ -23,17 +23,15 @@ import { InjectModel } from '@nestjs/mongoose';
 export class AuthorService {
   constructor(
     @InjectModel(Author.name) private authorModel: Model<AuthorDocument>,
-    private readonly authorMapper: AuthorMapper,
     @Inject(forwardRef(() => BookService))
     private readonly bookService: BookService,
   ) {}
 
   async create(createAuthorDto: CreateAuthorDto): Promise<AuthorResponseDto> {
     try {
-      // 1. Crear el autor primero
       const savedAuthor = await this.createAuthor(createAuthorDto);
 
-      // 2. Si vienen libros, crearlos
+      // 2. If books are provided, create them
       const createdBooks = [];
       if (createAuthorDto.books && createAuthorDto.books.length > 0) {
         for (const bookData of createAuthorDto.books) {
@@ -48,23 +46,15 @@ export class AuthorService {
               `Failed to create book "${bookData.title}":`,
               error.message,
             );
-            // Continúa con los otros libros en lugar de fallar completamente
           }
         }
       }
 
-      // 3. Obtener el autor actualizado con bookCount
-      const populatedAuthor = await this.getAuthorWithBookCount(
+      const populatedAuthor = await this.getAuthorWithBooks(
         savedAuthor._id.toString(),
       );
 
-      // 4. Preparar respuesta
-      const response = this.authorMapper.toResponseDto(populatedAuthor);
-
-      // 5. Agregar los libros creados a la respuesta si existen
-      if (createdBooks.length > 0) {
-        response.books = createdBooks;
-      }
+      const response = AuthorMapper.toResponseDto(populatedAuthor);
 
       return response;
     } catch (error) {
@@ -73,13 +63,13 @@ export class AuthorService {
   }
 
   /**
-   * Crea solo el autor (método privado para reutilización)
+   * Creates only the author (private method for reusability)
    */
   private async createAuthor(
     createAuthorDto: CreateAuthorDto,
   ): Promise<AuthorDocument> {
     try {
-      const authorData = this.authorMapper.toEntity(createAuthorDto);
+      const authorData = AuthorMapper.toEntity(createAuthorDto);
       const createdAuthor = new this.authorModel(authorData);
       return await createdAuthor.save();
     } catch (error) {
@@ -91,50 +81,44 @@ export class AuthorService {
   }
 
   /**
-   * Crea un libro para un autor específico usando BookService
+   * Creates a book for a specific author using BookService
    */
   private async createBookForAuthor(
     bookData: any,
     authorId: string,
   ): Promise<any> {
     try {
-      // Omitir authorId del bookData y usar el que pasamos
+      // Omit authorId from bookData and use the one we pass
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { authorId: _, ...bookWithoutAuthorId } = bookData;
 
       const bookDto = {
         ...bookWithoutAuthorId,
-        authorId: authorId, // Usar el authorId del autor creado
+        authorId: authorId, // Use the authorId from the created author
       };
 
-      // Usar BookService directamente - él se encarga de todo
       return await this.bookService.create(bookDto);
     } catch (error) {
-      // Si falla la creación del libro, el autor ya fue creado
+      // If book creation fails, the author was already created
       console.error(
         `Failed to create book for author ${authorId}:`,
         error.message,
       );
 
-      // Re-lanzar el error para que el controller lo maneje
+      // Re-throw the error so the controller can handle it
       throw error;
     }
   }
 
   /**
-   * Obtiene un autor con el bookCount actualizado
+   * Gets an author with their books populated
    */
-  private async getAuthorWithBookCount(
-    authorId: string,
-  ): Promise<AuthorDocument> {
-    return await this.authorModel
-      .findById(authorId)
-      .populate('bookCount')
-      .exec();
+  private async getAuthorWithBooks(authorId: string): Promise<AuthorDocument> {
+    return await this.authorModel.findById(authorId).populate('books').exec();
   }
 
   /**
-   * Maneja errores durante la creación
+   * Handles errors during creation
    */
   private handleCreateError(error: any): never {
     if (
@@ -149,6 +133,9 @@ export class AuthorService {
     );
   }
 
+  /**
+   * Retrieves paginated list of authors with their books
+   */
   async findAllPaginated(
     query: QueryAuthorDto,
   ): Promise<PaginatedResponseDto<AuthorResponseDto>> {
@@ -160,7 +147,7 @@ export class AuthorService {
     const [authors, total] = await Promise.all([
       this.authorModel
         .find(filter)
-        .populate('bookCount')
+        .populate('books')
         .skip(skip)
         .limit(limit)
         .exec(),
@@ -180,11 +167,14 @@ export class AuthorService {
       hasPrevPage,
     };
 
-    const data = this.authorMapper.toResponseDtoArray(authors);
+    const data = AuthorMapper.toResponseDtoArray(authors);
 
     return new PaginatedResponseDto(data, meta);
   }
 
+  /**
+   * Finds a single author by ID with their books
+   */
   async findOne(id: string): Promise<AuthorResponseDto> {
     if (!isValidObjectId(id)) {
       throw new BadRequestException('Invalid ID format');
@@ -193,14 +183,14 @@ export class AuthorService {
     try {
       const author = await this.authorModel
         .findById(id)
-        .populate('bookCount')
+        .populate('books')
         .exec();
 
       if (!author) {
         throw new NotFoundException(`Author with ID ${id} not found`);
       }
 
-      return this.authorMapper.toResponseDto(author);
+      return AuthorMapper.toResponseDto(author);
     } catch (error) {
       if (
         error instanceof NotFoundException ||
@@ -214,6 +204,9 @@ export class AuthorService {
     }
   }
 
+  /**
+   * Removes an author by ID
+   */
   async remove(id: string): Promise<void> {
     if (!isValidObjectId(id)) {
       throw new BadRequestException('Invalid ID format');
@@ -226,6 +219,9 @@ export class AuthorService {
     }
   }
 
+  /**
+   * Checks if an author exists by ID
+   */
   async exists(id: string): Promise<boolean> {
     if (!isValidObjectId(id)) {
       return false;
@@ -235,17 +231,15 @@ export class AuthorService {
     return count > 0;
   }
 
-  // Method to get authors with their books
+  /**
+   * Method to get authors with their books populated
+   */
   async findWithBooks(id: string) {
     if (!isValidObjectId(id)) {
       throw new BadRequestException('Invalid ID format');
     }
 
-    const author = await this.authorModel
-      .findById(id)
-      .populate('books')
-      .populate('bookCount')
-      .exec();
+    const author = await this.authorModel.findById(id).populate('books').exec();
 
     if (!author) {
       throw new NotFoundException(`Author with ID ${id} not found`);

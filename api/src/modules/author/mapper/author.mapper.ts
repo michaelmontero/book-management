@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
 import type { CreateAuthorDto } from '../dto/create-author.dto';
 import type { AuthorResponseDto } from '../dto/author-response.dto';
 import { Author, AuthorDocument } from '../schema/author.schema';
+import { BookMapper } from '##modules/book/mapper/book.mapper';
 
-@Injectable()
 export class AuthorMapper {
-  toEntity(createAuthorDto: CreateAuthorDto): Partial<Author> {
+  static toEntity(createAuthorDto: CreateAuthorDto): Partial<Author> {
     return {
       firstName: createAuthorDto.firstName?.trim(),
       lastName: createAuthorDto.lastName?.trim(),
@@ -17,7 +16,7 @@ export class AuthorMapper {
     };
   }
 
-  toResponseDto(authorDocument: AuthorDocument): AuthorResponseDto {
+  static toResponseDto(authorDocument: AuthorDocument): AuthorResponseDto {
     if (!authorDocument) {
       throw new Error('AuthorDocument is required for mapping');
     }
@@ -33,7 +32,7 @@ export class AuthorMapper {
         bio: authorDocument.bio,
         country: authorDocument.country,
         socialMedia: authorDocument.socialMedia || [],
-        books: (authorDocument as any).books || [],
+        books: BookMapper.toResponseDtoArray((authorDocument as any).books),
         createdAt: authorDocument.createdAt,
         updatedAt: authorDocument.updatedAt,
       } as AuthorResponseDto;
@@ -46,15 +45,17 @@ export class AuthorMapper {
     }
   }
 
-  toResponseDtoArray(authorDocuments: AuthorDocument[]): AuthorResponseDto[] {
+  static toResponseDtoArray(
+    authorDocuments: AuthorDocument[],
+  ): AuthorResponseDto[] {
     if (!Array.isArray(authorDocuments)) {
       return [];
     }
 
-    return authorDocuments.map((doc) => this.toResponseDto(doc));
+    return authorDocuments.map((doc) => AuthorMapper.toResponseDto(doc));
   }
 
-  hasChanges(updateData: Partial<Author>): boolean {
+  static hasChanges(updateData: Partial<Author>): boolean {
     return Object.keys(updateData).length > 0;
   }
 }

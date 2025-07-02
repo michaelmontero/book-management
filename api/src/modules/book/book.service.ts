@@ -21,7 +21,6 @@ import {
 export class BookService {
   constructor(
     @InjectModel(Book.name) private bookModel: Model<BookDocument>,
-    private readonly bookMapper: BookMapper,
     private readonly authorService: AuthorService,
   ) {}
 
@@ -30,7 +29,7 @@ export class BookService {
       // Validate that author exists
       await this.validateAuthorExists(createBookDto.authorId);
 
-      const bookData = this.bookMapper.toEntity(createBookDto);
+      const bookData = BookMapper.toEntity(createBookDto);
       const createdBook = new this.bookModel(bookData);
       const savedBook = await createdBook.save();
 
@@ -40,7 +39,7 @@ export class BookService {
         .populate('author')
         .exec();
 
-      return this.bookMapper.toResponseDto(populatedBook);
+      return BookMapper.toResponseDto(populatedBook);
     } catch (error) {
       if (error.code === 11000) {
         throw new ConflictException('Book with this ISBN already exists');
@@ -123,7 +122,7 @@ export class BookService {
       hasPrevPage,
     };
 
-    const data = this.bookMapper.toResponseDtoArray(books);
+    const data = BookMapper.toResponseDtoArray(books);
 
     return new PaginatedResponseDto(data, meta);
   }
@@ -140,7 +139,7 @@ export class BookService {
         throw new NotFoundException(`Book with ID ${id} not found`);
       }
 
-      return this.bookMapper.toResponseDto(book);
+      return BookMapper.toResponseDto(book);
     } catch (error) {
       if (
         error instanceof NotFoundException ||
@@ -163,7 +162,7 @@ export class BookService {
       .sort({ createdAt: -1 })
       .exec();
 
-    return this.bookMapper.toResponseDtoArray(books);
+    return BookMapper.toResponseDtoArray(books);
   }
 
   async findByISBN(isbn: string): Promise<BookResponseDto | null> {
@@ -172,7 +171,7 @@ export class BookService {
       .populate('author')
       .exec();
 
-    return book ? this.bookMapper.toResponseDto(book) : null;
+    return book ? BookMapper.toResponseDto(book) : null;
   }
 
   async exists(id: string): Promise<boolean> {
