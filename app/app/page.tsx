@@ -13,8 +13,8 @@ import { AddBookModal } from '@/components/add-book-modal';
 import { LoadMoreButton } from '@/components/load-more-button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { RefreshCw, Users, BookOpen } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import { StatsCards } from '@/components/stats-cards';
 
 export default function LibraryManagement() {
   const {
@@ -23,7 +23,6 @@ export default function LibraryManagement() {
     loadingMore,
     error,
     connectionError,
-    currentPage,
     totalAuthors,
     hasNextPage,
     handleAddAuthor,
@@ -79,56 +78,9 @@ export default function LibraryManagement() {
       />
 
       <div className="px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Connection Status & Stats */}
         <div className="mb-6 space-y-4">
           {/* Library Stats */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div className="space-y-1">
-                  <div className="flex items-center justify-center gap-1">
-                    <Users className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium text-gray-600">
-                      Total Authors
-                    </span>
-                  </div>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {totalAuthors}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-center gap-1">
-                    <BookOpen className="h-4 w-4 text-purple-600" />
-                    <span className="text-sm font-medium text-gray-600">
-                      Total Books
-                    </span>
-                  </div>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {authors.reduce(
-                      (sum, author) => sum + author.books.length,
-                      0,
-                    )}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-sm font-medium text-gray-600">
-                    Current Page
-                  </span>
-                  <p className="text-2xl font-bold text-green-600">
-                    {currentPage}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-sm font-medium text-gray-600">
-                    Showing
-                  </span>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {filteredAuthors.length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <StatsCards authors={authors} />
         </div>
 
         {error && (
