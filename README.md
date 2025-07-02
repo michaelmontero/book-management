@@ -84,7 +84,11 @@ yarn dev:app
 - 📸 Author photos with fallback avatars
 - 📚 ISBN validation for books
 - 🔄 Real-time updates via WebSocket
-- 🎨 Modern UI with Tailwind CSS
+
+## 🚧 Missing Features / TODO
+- [ ] Caché API responses for performance
+- [ ] Fix search and filter functionality
+- [ ] Error handling for API requests
 
 ## 📄 License
 
