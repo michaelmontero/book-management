@@ -1,21 +1,15 @@
-'use client';
+"use client"
 
-import { Globe, BookOpen, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { BookCard } from './book-card';
-import type { Author } from '@/types/library';
+import { Globe, BookOpen, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { BookCard } from "./book-card"
+import type { Author } from "@/types/library"
 
 interface AuthorCardProps {
-  author: Author;
-  onAddBook: (authorId: string) => void;
+  author: Author
+  onAddBook: (authorId: string) => void
 }
 
 export function AuthorCard({ author, onAddBook }: AuthorCardProps) {
@@ -27,6 +21,13 @@ export function AuthorCard({ author, onAddBook }: AuthorCardProps) {
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-3 min-w-0 flex-1">
               <Avatar className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-r from-blue-500 to-purple-500 flex-shrink-0">
+                {author.photo && (
+                  <AvatarImage
+                    src={author.photo || "/placeholder.svg"}
+                    alt={`${author.firstName} ${author.lastName}`}
+                    className="object-cover"
+                  />
+                )}
                 <AvatarFallback className="text-white font-semibold text-sm">
                   {author.firstName[0]}
                   {author.lastName[0]}
@@ -79,15 +80,8 @@ export function AuthorCard({ author, onAddBook }: AuthorCardProps) {
         {author.books.length === 0 ? (
           <div className="text-center py-6 sm:py-8 bg-gray-50 rounded-lg">
             <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-500 text-xs sm:text-sm mb-3">
-              No books yet
-            </p>
-            <Button
-              onClick={() => onAddBook(author.id)}
-              size="sm"
-              variant="outline"
-              className="text-xs sm:text-sm"
-            >
+            <p className="text-gray-500 text-xs sm:text-sm mb-3">No books yet</p>
+            <Button onClick={() => onAddBook(author.id)} size="sm" variant="outline" className="text-xs sm:text-sm">
               Add First Book
             </Button>
           </div>
@@ -100,5 +94,5 @@ export function AuthorCard({ author, onAddBook }: AuthorCardProps) {
         )}
       </CardContent>
     </Card>
-  );
+  )
 }

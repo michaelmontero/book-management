@@ -13,6 +13,7 @@ export interface Author {
   lastName: string;
   email: string;
   country?: string;
+  photo?: string;
   bio?: string;
   books: Book[];
 }
