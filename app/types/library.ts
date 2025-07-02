@@ -16,3 +16,18 @@ export interface Author {
   bio?: string;
   books: Book[];
 }
+
+export interface AuthorWithBooks {
+  firstName: string;
+  lastName: string;
+  email: string;
+  country?: string;
+  bio?: string;
+  books?: {
+    title: string;
+    isbn: string;
+    genre?: string;
+    publishedDate?: string;
+    pages?: number;
+  }[];
+}

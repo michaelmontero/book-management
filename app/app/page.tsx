@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState } from 'react';
@@ -10,9 +11,20 @@ import { LoadingState } from '@/components/loading-state';
 import { FloatingActionButton } from '@/components/floating-action-button';
 import { AddAuthorModal } from '@/components/add-author-modal';
 import { AddBookModal } from '@/components/add-book-modal';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react'; 
 
 export default function LibraryManagement() {
-  const { authors, loading, handleAddAuthor, handleAddBook } = useLibraryData();
+  const {
+    authors,
+    loading,
+    error,
+    connectionError,
+    handleAddAuthor,
+    handleAddBook,
+    refetch,
+  } = useLibraryData();
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddAuthorOpen, setIsAddAuthorOpen] = useState(false);
   const [isAddBookOpen, setIsAddBookOpen] = useState(false);
@@ -60,6 +72,32 @@ export default function LibraryManagement() {
       />
 
       <div className="px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {error && (
+          <Alert className="mb-6 border-red-200 bg-red-50">
+            <AlertDescription className="flex items-center justify-between">
+              <span className="text-red-800">Error loading data: {error}</span>
+              <Button
+                onClick={refetch}
+                size="sm"
+                variant="outline"
+                className="ml-4 border-red-200 text-red-800 hover:bg-red-100 bg-transparent"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {connectionError && (
+          <Alert className="mb-6 border-yellow-200 bg-yellow-50">
+            <AlertDescription className="text-yellow-800">
+              WebSocket connection error: {connectionError}. Real-time updates
+              may not work.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <StatsCards authors={authors} />
 
         <FloatingActionButton onAddAuthor={() => setIsAddAuthorOpen(true)} />
