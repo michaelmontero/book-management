@@ -5,6 +5,7 @@ import { HealthModule } from '##modules/health/health.module';
 import { LibraryConfigModule } from '##modules/config/config.module';
 import { BookModule } from '##modules/book/book.module';
 import { AuthorModule } from '##modules/author/author.module';
+import { WebsocketModule } from './modules/websocket/websocket.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AuthorModule } from '##modules/author/author.module';
     HealthModule,
     AuthorModule,
     BookModule,
+    WebsocketModule,
   ],
 })
 export class AppModule {}

@@ -16,12 +16,14 @@ import {
   PaginatedResponseDto,
   PaginationMetaDto,
 } from 'src/common/dto/pagination.dto';
+import { WebsocketService } from '##modules/websocket/websocket.service';
 
 @Injectable()
 export class BookService {
   constructor(
     @InjectModel(Book.name) private bookModel: Model<BookDocument>,
     private readonly authorService: AuthorService,
+    private readonly websocketService: WebsocketService,
   ) {}
 
   async create(createBookDto: CreateBookDto): Promise<BookResponseDto> {
@@ -39,7 +41,9 @@ export class BookService {
         .populate('author')
         .exec();
 
-      return BookMapper.toResponseDto(populatedBook);
+      const response = BookMapper.toResponseDto(populatedBook);
+      this.websocketService.emitBookCreated(response, createBookDto.authorId);
+      return response;
     } catch (error) {
       if (error.code === 11000) {
         throw new ConflictException('Book with this ISBN already exists');

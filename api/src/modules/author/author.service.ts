@@ -18,6 +18,7 @@ import { AuthorMapper } from './mapper/author.mapper';
 import { Author, AuthorDocument } from './schema/author.schema';
 import { BookService } from '../book/book.service';
 import { InjectModel } from '@nestjs/mongoose';
+import { WebsocketService } from '##modules/websocket/websocket.service';
 
 @Injectable()
 export class AuthorService {
@@ -25,6 +26,7 @@ export class AuthorService {
     @InjectModel(Author.name) private authorModel: Model<AuthorDocument>,
     @Inject(forwardRef(() => BookService))
     private readonly bookService: BookService,
+    private readonly websocketService: WebsocketService,
   ) {}
 
   async create(createAuthorDto: CreateAuthorDto): Promise<AuthorResponseDto> {
@@ -55,7 +57,7 @@ export class AuthorService {
       );
 
       const response = AuthorMapper.toResponseDto(populatedAuthor);
-
+      this.websocketService.emitAuthorCreated(response);
       return response;
     } catch (error) {
       return this.handleCreateError(error);
