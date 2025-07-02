@@ -4,27 +4,34 @@
 import { useState } from 'react';
 import { useLibraryData } from '@/hooks/use-library-data';
 import { LibraryHeader } from '@/components/library-header';
-import { StatsCards } from '@/components/stats-cards';
 import { AuthorCard } from '@/components/author-card';
 import { EmptyState } from '@/components/empty-state';
 import { LoadingState } from '@/components/loading-state';
 import { FloatingActionButton } from '@/components/floating-action-button';
 import { AddAuthorModal } from '@/components/add-author-modal';
 import { AddBookModal } from '@/components/add-book-modal';
+import { LoadMoreButton } from '@/components/load-more-button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { RefreshCw, Users, BookOpen } from 'lucide-react';
 
 export default function LibraryManagement() {
   const {
     authors,
     loading,
+    loadingMore,
     error,
     connectionError,
+    currentPage,
+    totalAuthors,
+    hasNextPage,
     handleAddAuthor,
     handleAddBook,
+    loadMoreAuthors,
     refetch,
-  } = useLibraryData();
+  } = useLibraryData({ initialLimit: 10 });
+
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddAuthorOpen, setIsAddAuthorOpen] = useState(false);
   const [isAddBookOpen, setIsAddBookOpen] = useState(false);
@@ -59,7 +66,7 @@ export default function LibraryManagement() {
     setIsAddBookOpen(true);
   };
 
-  if (loading) {
+  if (loading && authors.length === 0) {
     return <LoadingState />;
   }
 
@@ -72,6 +79,58 @@ export default function LibraryManagement() {
       />
 
       <div className="px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Connection Status & Stats */}
+        <div className="mb-6 space-y-4">
+          {/* Library Stats */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-center gap-1">
+                    <Users className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-600">
+                      Total Authors
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {totalAuthors}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-center gap-1">
+                    <BookOpen className="h-4 w-4 text-purple-600" />
+                    <span className="text-sm font-medium text-gray-600">
+                      Total Books
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {authors.reduce(
+                      (sum, author) => sum + author.books.length,
+                      0,
+                    )}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium text-gray-600">
+                    Current Page
+                  </span>
+                  <p className="text-2xl font-bold text-green-600">
+                    {currentPage}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-sm font-medium text-gray-600">
+                    Showing
+                  </span>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {filteredAuthors.length}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {error && (
           <Alert className="mb-6 border-red-200 bg-red-50">
             <AlertDescription className="flex items-center justify-between">
@@ -98,10 +157,9 @@ export default function LibraryManagement() {
           </Alert>
         )}
 
-        <StatsCards authors={authors} />
-
         <FloatingActionButton onAddAuthor={() => setIsAddAuthorOpen(true)} />
 
+        {/* Authors List */}
         <div className="space-y-3 sm:space-y-4 lg:space-y-6">
           {filteredAuthors.length === 0 ? (
             <EmptyState
@@ -109,13 +167,23 @@ export default function LibraryManagement() {
               onAddAuthor={() => setIsAddAuthorOpen(true)}
             />
           ) : (
-            filteredAuthors.map((author) => (
-              <AuthorCard
-                key={author.id}
-                author={author}
-                onAddBook={openAddBookModal}
+            <>
+              {filteredAuthors.map((author) => (
+                <AuthorCard
+                  key={author.id}
+                  author={author}
+                  onAddBook={openAddBookModal}
+                />
+              ))}
+
+              <LoadMoreButton
+                hasMore={hasNextPage}
+                loading={loadingMore}
+                onLoadMore={loadMoreAuthors}
+                totalLoaded={authors.length}
+                totalAvailable={totalAuthors}
               />
-            ))
+            </>
           )}
         </div>
 
