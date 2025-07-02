@@ -1,11 +1,17 @@
-"use client"
+'use client';
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type React from 'react';
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +19,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from '@/components/ui/dialog';
 import {
   Drawer,
   DrawerClose,
@@ -22,40 +28,47 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-} from "@/components/ui/drawer"
-import { useMediaQuery } from "@/hooks/use-mobile"
-import { Book } from '@/types/library'
+} from '@/components/ui/drawer';
+import { useMediaQuery } from '@/hooks/use-mobile';
+import { Book } from '@/types/library';
 
 interface Author {
-  id: string
-  firstName: string
-  lastName: string
-  email: string
-  country?: string
-  bio?: string
-  books: Book[]
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  country?: string;
+  bio?: string;
+  books: Book[];
 }
 
 interface FormData {
-  title: string
-  isbn: string
-  authorId: string
-  genre: string
-  publishedDate: string
-  pages: string
+  title: string;
+  isbn: string;
+  authorId: string;
+  genre: string;
+  publishedDate: string;
+  pages: string;
 }
 
 interface FormContentProps {
-  formData: FormData
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>
-  authors: Author[]
-  onSubmit: (e: React.FormEvent) => void
-  onClose: () => void
-  isMobile: boolean
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  authors: Author[];
+  onSubmit: (e: React.FormEvent) => void;
+  onClose: () => void;
+  isMobile: boolean;
 }
 
 // Move FormContent outside to prevent recreation
-function FormContent({ formData, setFormData, authors, onSubmit, onClose, isMobile }: FormContentProps) {
+function FormContent({
+  formData,
+  setFormData,
+  authors,
+  onSubmit,
+  onClose,
+  isMobile,
+}: FormContentProps) {
   return (
     <form onSubmit={onSubmit} className="space-y-4 px-4 sm:px-0">
       <div className="space-y-2">
@@ -64,7 +77,9 @@ function FormContent({ formData, setFormData, authors, onSubmit, onClose, isMobi
         </Label>
         <Select
           value={formData.authorId}
-          onValueChange={(value) => setFormData((prev) => ({ ...prev, authorId: value }))}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, authorId: value }))
+          }
           required
         >
           <SelectTrigger className="h-11">
@@ -87,7 +102,9 @@ function FormContent({ formData, setFormData, authors, onSubmit, onClose, isMobi
         <Input
           id="title"
           value={formData.title}
-          onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, title: e.target.value }))
+          }
           required
           placeholder="One Hundred Years of Solitude"
           className="h-11"
@@ -101,7 +118,9 @@ function FormContent({ formData, setFormData, authors, onSubmit, onClose, isMobi
         <Input
           id="isbn"
           value={formData.isbn}
-          onChange={(e) => setFormData((prev) => ({ ...prev, isbn: e.target.value }))}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, isbn: e.target.value }))
+          }
           required
           placeholder="978-0060883287"
           className="h-11"
@@ -116,7 +135,9 @@ function FormContent({ formData, setFormData, authors, onSubmit, onClose, isMobi
           <Input
             id="genre"
             value={formData.genre}
-            onChange={(e) => setFormData((prev) => ({ ...prev, genre: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, genre: e.target.value }))
+            }
             placeholder="Magical Realism"
             className="h-11"
           />
@@ -130,7 +151,9 @@ function FormContent({ formData, setFormData, authors, onSubmit, onClose, isMobi
             id="pages"
             type="number"
             value={formData.pages}
-            onChange={(e) => setFormData((prev) => ({ ...prev, pages: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, pages: e.target.value }))
+            }
             placeholder="417"
             className="h-11"
           />
@@ -145,7 +168,10 @@ function FormContent({ formData, setFormData, authors, onSubmit, onClose, isMobi
           id="publishedDate"
           type="date"
           value={formData.publishedDate}
-          onChange={(e) => setFormData((prev) => ({ ...prev, publishedDate: e.target.value }))}
+          max={new Date().toISOString().split('T')[0]}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, publishedDate: e.target.value }))
+          }
           className="h-11"
         />
       </div>
@@ -159,7 +185,11 @@ function FormContent({ formData, setFormData, authors, onSubmit, onClose, isMobi
             Add Book
           </Button>
           <DrawerClose asChild>
-            <Button variant="outline" onClick={onClose} className="h-11 bg-transparent">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="h-11 bg-transparent"
+            >
               Cancel
             </Button>
           </DrawerClose>
@@ -178,44 +208,50 @@ function FormContent({ formData, setFormData, authors, onSubmit, onClose, isMobi
         </DialogFooter>
       )}
     </form>
-  )
+  );
 }
 
 interface AddBookModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
   onSubmit: (book: {
-    title: string
-    isbn: string
-    authorId: string
-    genre?: string
-    publishedDate?: string
-    pages?: number
-  }) => void
-  authors: Author[]
-  selectedAuthorId?: string
+    title: string;
+    isbn: string;
+    authorId: string;
+    genre?: string;
+    publishedDate?: string;
+    pages?: number;
+  }) => void;
+  authors: Author[];
+  selectedAuthorId?: string;
 }
 
-export function AddBookModal({ isOpen, onClose, onSubmit, authors, selectedAuthorId }: AddBookModalProps) {
+export function AddBookModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  authors,
+  selectedAuthorId,
+}: AddBookModalProps) {
   const [formData, setFormData] = useState<FormData>({
-    title: "",
-    isbn: "",
-    authorId: "",
-    genre: "",
-    publishedDate: "",
-    pages: "",
-  })
+    title: '',
+    isbn: '',
+    authorId: '',
+    genre: '',
+    publishedDate: '',
+    pages: '',
+  });
 
-  const isMobile = useMediaQuery("(max-width: 768px)")
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   useEffect(() => {
     if (selectedAuthorId) {
-      setFormData((prev) => ({ ...prev, authorId: selectedAuthorId }))
+      setFormData((prev) => ({ ...prev, authorId: selectedAuthorId }));
     }
-  }, [selectedAuthorId])
+  }, [selectedAuthorId]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     onSubmit({
       title: formData.title,
       isbn: formData.isbn,
@@ -223,28 +259,20 @@ export function AddBookModal({ isOpen, onClose, onSubmit, authors, selectedAutho
       genre: formData.genre || undefined,
       publishedDate: formData.publishedDate || undefined,
       pages: formData.pages ? Number.parseInt(formData.pages) : undefined,
-    })
-    setFormData({
-      title: "",
-      isbn: "",
-      authorId: "",
-      genre: "",
-      publishedDate: "",
-      pages: "",
-    })
-  }
+    });
+  };
 
   const handleClose = () => {
     setFormData({
-      title: "",
-      isbn: "",
-      authorId: "",
-      genre: "",
-      publishedDate: "",
-      pages: "",
-    })
-    onClose()
-  }
+      title: '',
+      isbn: '',
+      authorId: '',
+      genre: '',
+      publishedDate: '',
+      pages: '',
+    });
+    onClose();
+  };
 
   if (isMobile) {
     return (
@@ -255,7 +283,8 @@ export function AddBookModal({ isOpen, onClose, onSubmit, authors, selectedAutho
               Add New Book
             </DrawerTitle>
             <DrawerDescription>
-              Add a new book to your library. Select an author and fill in the book details.
+              Add a new book to your library. Select an author and fill in the
+              book details.
             </DrawerDescription>
           </DrawerHeader>
           <div className="overflow-y-auto flex-1">
@@ -270,7 +299,7 @@ export function AddBookModal({ isOpen, onClose, onSubmit, authors, selectedAutho
           </div>
         </DrawerContent>
       </Drawer>
-    )
+    );
   }
 
   return (
@@ -281,7 +310,8 @@ export function AddBookModal({ isOpen, onClose, onSubmit, authors, selectedAutho
             Add New Book
           </DialogTitle>
           <DialogDescription>
-            Add a new book to your library. Select an author and fill in the book details.
+            Add a new book to your library. Select an author and fill in the
+            book details.
           </DialogDescription>
         </DialogHeader>
         <FormContent
@@ -294,5 +324,5 @@ export function AddBookModal({ isOpen, onClose, onSubmit, authors, selectedAutho
         />
       </DialogContent>
     </Dialog>
-  )
+  );
 }

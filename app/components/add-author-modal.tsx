@@ -270,6 +270,7 @@ function FormContent({ formData, setFormData, onSubmit, onClose, isMobile }: For
                       <Input
                         type="date"
                         value={book.publishedDate}
+                         max={new Date().toISOString().split("T")[0]}
                         onChange={(e) => updateBook(book.id, "publishedDate", e.target.value)}
                         className="h-9 text-sm"
                       />

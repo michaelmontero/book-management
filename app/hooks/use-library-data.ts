@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import type { Author, Book } from "@/types/library"
 
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || "http://localhost:3001"
 export function useLibraryData() {
   const [authors, setAuthors] = useState<Author[]>([])
   const [loading, setLoading] = useState(true)
@@ -13,9 +14,9 @@ export function useLibraryData() {
 
   const fetchAuthors = async () => {
     try {
-      const response = await fetch("/api/authors")
+      const response = await fetch(`${API_HOST}/authors`)
       const data = await response.json()
-      setAuthors(data)
+      setAuthors(data?.data || [])
     } catch (error) {
       console.error("Failed to fetch authors:", error)
     } finally {
@@ -25,7 +26,7 @@ export function useLibraryData() {
 
   const handleAddAuthor = async (authorData: Omit<Author, "id" | "books">) => {
     try {
-      const response = await fetch("/api/authors", {
+      const response = await fetch(`${API_HOST}/authors`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(authorData),
@@ -44,7 +45,7 @@ export function useLibraryData() {
 
   const handleAddBook = async (bookData: Omit<Book, "id"> & { authorId: string }) => {
     try {
-      const response = await fetch("/api/books", {
+      const response = await fetch(`${API_HOST}/books`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookData),
