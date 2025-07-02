@@ -7,7 +7,7 @@
     "app"
   ],
   "scripts": {
-    "dev:api": "cd api && npm run start:dev",
+    "dev:api": "cd api && npm run dev",
     "dev:app": "cd app && npm run dev",
     "build:api": "cd api && npm run build",
     "build:app": "cd app && npm run build",

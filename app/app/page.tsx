@@ -1,103 +1,102 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import { useLibraryData } from '@/hooks/use-library-data';
+import { LibraryHeader } from '@/components/library-header';
+import { StatsCards } from '@/components/stats-cards';
+import { AuthorCard } from '@/components/author-card';
+import { EmptyState } from '@/components/empty-state';
+import { LoadingState } from '@/components/loading-state';
+import { FloatingActionButton } from '@/components/floating-action-button';
+import { AddAuthorModal } from '@/components/add-author-modal';
+import { AddBookModal } from '@/components/add-book-modal';
+
+export default function LibraryManagement() {
+  const { authors, loading, handleAddAuthor, handleAddBook } = useLibraryData();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isAddAuthorOpen, setIsAddAuthorOpen] = useState(false);
+  const [isAddBookOpen, setIsAddBookOpen] = useState(false);
+  const [selectedAuthorId, setSelectedAuthorId] = useState<string>('');
+
+  const filteredAuthors = authors.filter(
+    (author) =>
+      `${author.firstName} ${author.lastName}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      author.books.some((book) =>
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
+  );
+
+  const onAddAuthor = async (authorData: any) => {
+    const success = await handleAddAuthor(authorData);
+    if (success) {
+      setIsAddAuthorOpen(false);
+    }
+  };
+
+  const onAddBook = async (bookData: any) => {
+    const success = await handleAddBook(bookData);
+    if (success) {
+      setIsAddBookOpen(false);
+    }
+  };
+
+  const openAddBookModal = (authorId: string) => {
+    setSelectedAuthorId(authorId);
+    setIsAddBookOpen(true);
+  };
+
+  if (loading) {
+    return <LoadingState />;
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <LibraryHeader
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onAddAuthor={() => setIsAddAuthorOpen(true)}
+      />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+      <div className="px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <StatsCards authors={authors} />
+
+        <FloatingActionButton onAddAuthor={() => setIsAddAuthorOpen(true)} />
+
+        <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+          {filteredAuthors.length === 0 ? (
+            <EmptyState
+              searchTerm={searchTerm}
+              onAddAuthor={() => setIsAddAuthorOpen(true)}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          ) : (
+            filteredAuthors.map((author) => (
+              <AuthorCard
+                key={author.id}
+                author={author}
+                onAddBook={openAddBookModal}
+              />
+            ))
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="lg:hidden h-16" />
+      </div>
+
+      <AddAuthorModal
+        isOpen={isAddAuthorOpen}
+        onClose={() => setIsAddAuthorOpen(false)}
+        onSubmit={onAddAuthor}
+      />
+
+      <AddBookModal
+        isOpen={isAddBookOpen}
+        onClose={() => setIsAddBookOpen(false)}
+        onSubmit={onAddBook}
+        authors={authors}
+        selectedAuthorId={selectedAuthorId}
+      />
     </div>
   );
 }
