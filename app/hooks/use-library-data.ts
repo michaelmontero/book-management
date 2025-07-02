@@ -25,9 +25,8 @@ export function useLibraryData() {
         throw new Error('Response is not JSON');
       }
 
-   
-      const data = await response.json()
-      setAuthors(data?.data || [])
+      const data = await response.json();
+      setAuthors(data?.data || []);
     } catch (error) {
       console.error('Failed to fetch authors:', error);
       setError(

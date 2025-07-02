@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ISBNInput } from './isbn-input';
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer';
 import { useMediaQuery } from '@/hooks/use-mobile';
+import { validateISBN } from '@/utils/isbn-validator';
 import { Book } from '@/types/library';
 
 interface Author {
@@ -69,8 +71,21 @@ function FormContent({
   onClose,
   isMobile,
 }: FormContentProps) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate ISBN before submitting
+    const validation = validateISBN(formData.isbn);
+    if (!validation.isValid) {
+      alert('Please enter a valid ISBN before submitting.');
+      return;
+    }
+
+    onSubmit(e);
+  };
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4 px-4 sm:px-0">
+    <form onSubmit={handleSubmit} className="space-y-4 px-4 sm:px-0">
       <div className="space-y-2">
         <Label htmlFor="author" className="text-sm font-medium">
           Author *
@@ -111,21 +126,12 @@ function FormContent({
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="isbn" className="text-sm font-medium">
-          ISBN *
-        </Label>
-        <Input
-          id="isbn"
-          value={formData.isbn}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, isbn: e.target.value }))
-          }
-          required
-          placeholder="978-0060883287"
-          className="h-11"
-        />
-      </div>
+      <ISBNInput
+        value={formData.isbn}
+        onChange={(value) => setFormData((prev) => ({ ...prev, isbn: value }))}
+        required
+        id="isbn"
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -168,10 +174,10 @@ function FormContent({
           id="publishedDate"
           type="date"
           value={formData.publishedDate}
-          max={new Date().toISOString().split('T')[0]}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, publishedDate: e.target.value }))
           }
+          max={new Date().toISOString().split('T')[0]}
           className="h-11"
         />
       </div>
@@ -252,13 +258,23 @@ export function AddBookModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     onSubmit({
       title: formData.title,
-      isbn: formData.isbn,
+      isbn: formData.isbn.replace(/[-\s]/g, ''), // Clean ISBN for backend
       authorId: formData.authorId,
       genre: formData.genre || undefined,
       publishedDate: formData.publishedDate || undefined,
       pages: formData.pages ? Number.parseInt(formData.pages) : undefined,
+    });
+
+    setFormData({
+      title: '',
+      isbn: '',
+      authorId: '',
+      genre: '',
+      publishedDate: '',
+      pages: '',
     });
   };
 

@@ -1,18 +1,22 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { BookOpen, Search, Plus, Menu, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState } from 'react';
+import { BookOpen, Search, Plus, Menu, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface LibraryHeaderProps {
-  searchTerm: string
-  onSearchChange: (value: string) => void
-  onAddAuthor: () => void
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  onAddAuthor: () => void;
 }
 
-export function LibraryHeader({ searchTerm, onSearchChange, onAddAuthor }: LibraryHeaderProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+export function LibraryHeader({
+  searchTerm,
+  onSearchChange,
+  onAddAuthor,
+}: LibraryHeaderProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40">
@@ -24,8 +28,12 @@ export function LibraryHeader({ searchTerm, onSearchChange, onAddAuthor }: Libra
               <BookOpen className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg sm:text-xl font-bold text-gray-900">Library Management</h1>
-              <p className="text-xs sm:text-sm text-gray-500 hidden md:block">Manage your authors and books</p>
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900">
+                Library Management
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-500 hidden md:block">
+                Manage your authors and books
+              </p>
             </div>
           </div>
 
@@ -51,8 +59,17 @@ export function LibraryHeader({ searchTerm, onSearchChange, onAddAuthor }: Libra
 
           {/* Mobile Menu Button */}
           <div className="lg:hidden">
-            <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2">
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
           </div>
         </div>
@@ -72,8 +89,8 @@ export function LibraryHeader({ searchTerm, onSearchChange, onAddAuthor }: Libra
               </div>
               <Button
                 onClick={() => {
-                  onAddAuthor()
-                  setMobileMenuOpen(false)
+                  onAddAuthor();
+                  setMobileMenuOpen(false);
                 }}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 w-full h-11"
               >
@@ -85,5 +102,5 @@ export function LibraryHeader({ searchTerm, onSearchChange, onAddAuthor }: Libra
         )}
       </div>
     </div>
-  )
+  );
 }

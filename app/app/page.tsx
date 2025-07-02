@@ -13,7 +13,7 @@ import { AddAuthorModal } from '@/components/add-author-modal';
 import { AddBookModal } from '@/components/add-book-modal';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react'; 
+import { RefreshCw } from 'lucide-react';
 
 export default function LibraryManagement() {
   const {

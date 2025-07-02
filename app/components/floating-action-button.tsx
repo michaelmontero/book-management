@@ -1,13 +1,15 @@
-"use client"
+'use client';
 
-import { Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface FloatingActionButtonProps {
-  onAddAuthor: () => void
+  onAddAuthor: () => void;
 }
 
-export function FloatingActionButton({ onAddAuthor }: FloatingActionButtonProps) {
+export function FloatingActionButton({
+  onAddAuthor,
+}: FloatingActionButtonProps) {
   return (
     <div className="lg:hidden fixed bottom-4 right-4 z-30">
       <Button
@@ -18,5 +20,5 @@ export function FloatingActionButton({ onAddAuthor }: FloatingActionButtonProps)
         <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
       </Button>
     </div>
-  )
+  );
 }
