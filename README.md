@@ -1,15 +1,15 @@
 # AUCTO Monorepo
 
-Este es el monorepo principal que contiene:
+This is the monorepo which constains:
 - `api/` - Backend API
 - `app/` - Frontend Application
 
-## Estructura del proyecto
+## Project structure of the project
 
 ```
 aucto/
 ├── api/          # Backend NestJS
 ├── app/          # Frontend (React/Next.js/etc)
 ├── package.json  # Root package.json
-└── README.md     # Este archivo
+└── README.md     # this file archivo
 ```
