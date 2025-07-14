@@ -145,15 +145,11 @@ export function useLibraryData(options: UseLibraryDataOptions = {}) {
       ),
     );
   }, []);
-
-  const handleLibraryUpdated = useCallback(() => {
-    refreshCurrentPage();
-  }, [refreshCurrentPage]);
+ 
 
   const { isConnected, connectionError } = useWebSocket({
     onAuthorCreated: handleAuthorCreated,
     onBookCreated: handleBookCreated,
-    onLibraryUpdated: handleLibraryUpdated,
   });
 
   useEffect(() => {

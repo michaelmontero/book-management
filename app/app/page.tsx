@@ -2,19 +2,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useLibraryData } from '@/hooks/use-library-data';
-import { LibraryHeader } from '@/components/library-header';
-import { AuthorCard } from '@/components/author-card';
+import { RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { StatsCards } from '@/components/stats-cards';
 import { EmptyState } from '@/components/empty-state';
+import { AuthorCard } from '@/components/author-card';
 import { LoadingState } from '@/components/loading-state';
-import { FloatingActionButton } from '@/components/floating-action-button';
-import { AddAuthorModal } from '@/components/add-author-modal';
+import { useLibraryData } from '@/hooks/use-library-data';
 import { AddBookModal } from '@/components/add-book-modal';
+import { LibraryHeader } from '@/components/library-header';
+import { AddAuthorModal } from '@/components/add-author-modal';
 import { LoadMoreButton } from '@/components/load-more-button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
-import { StatsCards } from '@/components/stats-cards';
+import { FloatingActionButton } from '@/components/floating-action-button';
 
 export default function LibraryManagement() {
   const {
@@ -80,7 +80,7 @@ export default function LibraryManagement() {
       <div className="px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         <div className="mb-6 space-y-4">
           {/* Library Stats */}
-          <StatsCards authors={authors} />
+          <StatsCards authors={authors} totalAuthors={totalAuthors} />
         </div>
 
         {error && (

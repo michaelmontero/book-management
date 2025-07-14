@@ -2,6 +2,7 @@ import type { CreateAuthorDto } from '../dto/create-author.dto';
 import type { AuthorResponseDto } from '../dto/author-response.dto';
 import { Author, AuthorDocument } from '../schema/author.schema';
 import { BookMapper } from '##modules/book/mapper/book.mapper';
+import { BookAuthorDto } from '##modules/book/dto/book-response.dto';
 
 export class AuthorMapper {
   static toEntity(createAuthorDto: CreateAuthorDto): Partial<Author> {
@@ -52,10 +53,22 @@ export class AuthorMapper {
       return [];
     }
 
-    return authorDocuments.map((doc) => AuthorMapper.toResponseDto(doc));
+    return authorDocuments.map(AuthorMapper.toResponseDto);
   }
 
-  static hasChanges(updateData: Partial<Author>): boolean {
-    return Object.keys(updateData).length > 0;
+   /**
+   * Helper method to map author data
+   */
+  static mapBasicAuthor(author: any): BookAuthorDto | undefined {
+    if (!author) {
+      return undefined;
+    }
+
+    return {
+      id: author._id?.toString() || author.id,
+      firstName: author.firstName,
+      lastName: author.lastName,
+      fullName: `${author.firstName} ${author.lastName}`,
+    };
   }
 }

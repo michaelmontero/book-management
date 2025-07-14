@@ -16,13 +16,11 @@ interface WebSocketEvent {
 interface UseWebSocketProps {
   onAuthorCreated?: (author: any) => void;
   onBookCreated?: (book: any, authorId: string) => void;
-  onLibraryUpdated?: () => void;
 }
 
 export function useWebSocket({
   onAuthorCreated,
   onBookCreated,
-  onLibraryUpdated,
 }: UseWebSocketProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
@@ -69,7 +67,7 @@ export function useWebSocket({
     return () => {
       socket.disconnect();
     };
-  }, [onAuthorCreated, onBookCreated, onLibraryUpdated]);
+  }, [onAuthorCreated, onBookCreated]);
 
   return {
     isConnected,

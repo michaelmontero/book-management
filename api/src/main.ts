@@ -24,8 +24,7 @@ async function bootstrap() {
         }
       : {},
   );
-  const isSwaggerEnabled = configService.get<boolean>('SWAGGER_ENABLE');
-  if (isSwaggerEnabled) {
+
     const config = new DocumentBuilder()
       .setTitle('Library Management API')
       .setDescription('API for managing authors and books')
@@ -36,16 +35,12 @@ async function bootstrap() {
 
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);
-  }
 
   const port = configService.get<number>('PORT') || 3001;
   await app.listen(port);
 
   console.log(`🚀 Application is running on: http://localhost:${port}`);
-  if (isSwaggerEnabled)
-    console.log(
-      `📚 Swagger docs available at: http://localhost:${port}/api/docs`,
-    );
+ 
 }
 
 bootstrap();

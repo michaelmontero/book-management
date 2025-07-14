@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { CreateBookDto } from '../dto/create-book.dto';
-import { BookResponseDto, BookAuthorDto } from '../dto/book-response.dto';
+import { BookResponseDto } from '../dto/book-response.dto';
 import { Book, BookDocument } from '../schema/book.schema';
+import { AuthorMapper } from '##modules/author/mapper/author.mapper';
 
 @Injectable()
 export class BookMapper {
@@ -43,7 +44,7 @@ export class BookMapper {
         title: bookDocument.title,
         isbn: bookDocument.isbn,
         authorId: bookDocument.authorId?.toString(),
-        author: this.mapAuthor(bookDocument.author),
+        author: AuthorMapper.mapBasicAuthor(bookDocument.author),
         publishedDate: bookDocument.publishedDate,
         genre: bookDocument.genre,
         description: bookDocument.description,
@@ -73,7 +74,7 @@ export class BookMapper {
       return [];
     }
 
-    return bookDocuments.map((doc) => this.toResponseDto(doc));
+    return bookDocuments.map(this.toResponseDto);
   }
 
   /**
@@ -87,7 +88,7 @@ export class BookMapper {
       title: bookDocument.title,
       isbn: bookDocument.isbn,
       authorId: bookDocument.authorId?.toString(),
-      author: this.mapAuthor(bookDocument.author),
+      author: AuthorMapper.mapBasicAuthor(bookDocument.author),
       genre: bookDocument.genre,
       coverImage: bookDocument.coverImage,
       price: bookDocument.price,
@@ -107,52 +108,8 @@ export class BookMapper {
       return [];
     }
 
-    return bookDocuments.map((doc) => this.toSimpleResponse(doc));
+    return bookDocuments.map(this.toSimpleResponse);
   }
 
-  /**
-   * Helper method to map author data
-   */
-  private static mapAuthor(author: any): BookAuthorDto | undefined {
-    if (!author) {
-      return undefined;
-    }
-
-    return {
-      id: author._id?.toString() || author.id,
-      firstName: author.firstName,
-      lastName: author.lastName,
-      fullName: `${author.firstName} ${author.lastName}`,
-    };
-  }
-
-  /**
-   * Helper method to check if update data has any actual changes
-   */
-  static hasChanges(updateData: Partial<Book>): boolean {
-    return Object.keys(updateData).length > 0;
-  }
-
-  /**
-   * Helper method to prepare data for search/filtering
-   */
-  static prepareSearchData(bookDocument: BookDocument): any {
-    return {
-      id: bookDocument._id?.toString(),
-      title: bookDocument.title?.toLowerCase(),
-      isbn: bookDocument.isbn,
-      genre: bookDocument.genre?.toLowerCase(),
-      description: bookDocument.description?.toLowerCase(),
-      publisher: bookDocument.publisher?.toLowerCase(),
-      searchText: [
-        bookDocument.title,
-        bookDocument.genre,
-        bookDocument.description,
-        bookDocument.publisher,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase(),
-    };
-  }
+ 
 }

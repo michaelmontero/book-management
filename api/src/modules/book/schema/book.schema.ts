@@ -31,14 +31,6 @@ export class Book {
     required: true,
     unique: true,
     trim: true,
-    validate: {
-      validator: (isbn: string) => {
-        // Basic ISBN validation (ISBN-10 or ISBN-13)
-        const cleanISBN = isbn.replace(/[-\s]/g, '');
-        return /^(?:\d{9}[\dX]|\d{13})$/.test(cleanISBN);
-      },
-      message: 'Invalid ISBN format',
-    },
   })
   isbn: string;
 
@@ -129,21 +121,3 @@ BookSchema.index({ available: 1 });
 BookSchema.index({ publishedDate: -1 });
 BookSchema.index({ createdAt: -1 });
 BookSchema.index({ title: 'text', description: 'text', genre: 'text' });
-
-BookSchema.pre('save', function (next) {
-  if (this.isbn) {
-    this.isbn = this.isbn.replace(/[-\s]/g, '');
-  }
-  next();
-});
-
-BookSchema.pre(
-  ['findOneAndUpdate', 'updateOne', 'updateMany'],
-  function (next) {
-    const update = this.getUpdate() as any;
-    if (update.isbn) {
-      update.isbn = update.isbn.replace(/[-\s]/g, '');
-    }
-    next();
-  },
-);

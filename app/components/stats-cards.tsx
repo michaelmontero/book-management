@@ -3,10 +3,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { Author } from '@/types/library';
 
 interface StatsCardsProps {
+  totalAuthors: number;
   authors: Author[];
 }
 
-export function StatsCards({ authors }: StatsCardsProps) {
+export function StatsCards({ authors, totalAuthors }: StatsCardsProps) {
   const totalBooks = authors.reduce(
     (sum, author) => sum + author.books.length,
     0,
@@ -26,7 +27,7 @@ export function StatsCards({ authors }: StatsCardsProps) {
                 Authors
               </p>
               <p className="text-xl sm:text-2xl lg:text-3xl font-bold">
-                {authors.length}
+                {totalAuthors}
               </p>
             </div>
             <Users className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-blue-200" />
